@@ -60,9 +60,10 @@ class CRM_Giga_AutoMail
    *
    * @param int $news_source_id
    * @param int $mailing_group_id
+   * @param bool $test_mode If TRUE, do not send the mailing and do not mark items consumed.
    * @return int number of items included in the mailing sent.
    */
-  public function process($news_source_id, $mailing_group_id) {
+  public function process($news_source_id, $mailing_group_id, $test_mode = FALSE) {
 
     // Fetch data.
     $group = civicrm_api3('Group', 'getsingle', [
@@ -77,18 +78,22 @@ class CRM_Giga_AutoMail
 
     // Create and send mailing.
     $mailing_id = $this->createMailing($items['values'], $group);
-    if ($mailing_id) {
-      $this->sendMailing($mailing_id);
-    }
 
-    // Mark items as consumed.
-    if ($items['values']) {
-      // Mark each of these items consumed.
-      foreach (array_keys($items['values']) as $consumed_id) {
-        $result = civicrm_api3('NewsStoreConsume', 'create', [
-          'id'          => $consumed_id,
-          'is_consumed' => 1,
-        ]);
+    if (!$test_mode) {
+
+      if ($mailing_id) {
+        $this->sendMailing($mailing_id);
+      }
+
+      // Mark items as consumed.
+      if ($items['values']) {
+        // Mark each of these items consumed.
+        foreach (array_keys($items['values']) as $consumed_id) {
+          $result = civicrm_api3('NewsStoreConsume', 'create', [
+            'id'          => $consumed_id,
+            'is_consumed' => 1,
+          ]);
+        }
       }
     }
 
