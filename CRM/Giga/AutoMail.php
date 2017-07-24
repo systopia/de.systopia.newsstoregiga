@@ -2,7 +2,6 @@
 /**
  * GIGA specific use of NewsStore.
  */
-
 class CRM_Giga_AutoMail
 {
   /**
@@ -76,21 +75,21 @@ class CRM_Giga_AutoMail
       'is_consumed' => 0, // Only unconsumed items.
     ));
 
-    // Create and send mailing.
+    // Create mailing.
     $mailing_id = $this->createMailing($items['values'], $group);
 
     if (!$test_mode) {
+      // NOT test mode.
 
       if ($mailing_id) {
         $this->sendMailing($mailing_id);
       }
 
-      // Mark items as consumed.
       if ($items['values']) {
         // Mark each of these items consumed.
-        foreach (array_keys($items['values']) as $consumed_id) {
-          $result = civicrm_api3('NewsStoreConsume', 'create', [
-            'id'          => $consumed_id,
+        foreach ($items['values'] as $item) {
+          $result = civicrm_api3('NewsStoreConsumed', 'create', [
+            'id'          => $item['newsstoreconsumed_id'],
             'is_consumed' => 1,
           ]);
         }
@@ -113,7 +112,7 @@ class CRM_Giga_AutoMail
     // Got items. Create a mailing.
     $mailing_result = civicrm_api3('Mailing', 'create', [
       'sequential' => 1,
-      'name'       => ts(count($items)>1 ? "$items items: " : '1 item: ') . $mailing_group['title'],
+      'name'       => ts(count($items)>1 ? count($items) . " items: " : '1 item: ') . $mailing_group['title'],
       'from_name'  => "Testers", // @todo
       'from_email' => "forums@artfulrobot.uk", // @todo
       'subject'    => "test 1",
@@ -148,7 +147,7 @@ class CRM_Giga_AutoMail
       $obj = unserialize($item['object']);
       $html_items .= strtr($this->item_tpl, [
         '%ITEM_TITLE%'           => htmlspecialchars($item['title']),
-        '%ITEM_DESCRIPTION%'     => $item['description'],
+        '%ITEM_DESCRIPTION%'     => $obj['item/description'],
         '%ITEM_TEASER%'          => htmlspecialchars($item['teaser']),
         '%ITEM_LINK%'            => $item['uri'],
         '%ITEM_IMAGE_SRC%'       => $obj['item/enclosure@url'],
