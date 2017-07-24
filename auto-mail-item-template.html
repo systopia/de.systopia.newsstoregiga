@@ -9,8 +9,8 @@
             <tbody><tr>
                 <td bgcolor="#ffffff" align="left" style="background-color: #ffffff; font-size: 15px; font-family: Arial, Helvetica, sans-serif; color: #555555; text-align: left;">
                   <h3 style="display: block;margin: 0;padding: 0;color: #555555;font-family: Helvetica;font-size: 18px;font-style: normal;font-weight: normal;line-height: 125%;letter-spacing: normal;text-align: left;">
-                    <!-- @todo where does this come from?-->
-                    André Bank, Maria Josua  </h3>
+                    %ITEM_DC:CREATOR%
+                  </h3>
                 </td>
               </tr>
             </tbody>
@@ -132,7 +132,7 @@
 </table>
 
 
-<!-- image -->
+<!-- Image, linked to story. -->
 <table class="vb-outer" width="100%" cellpadding="0" border="0" cellspacing="0" bgcolor="#bfbfbf" style="background-color: #bfbfbf;" id="ko_imageBlock_7">
   <tbody>
     <tr>
@@ -143,8 +143,7 @@
             <tbody>
               <tr>
                 <td valign="top" align="center">
-                  <!--Following content is from the <enclosure> and <link> elements of the feed-->
-                  <a href="https://www.giga-hamburg.de/en/publication/more-stable-together-the-international-dimensions-of-authoritarian-rule" target="_blank" style="text-decoration: none;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"><img hspace="0" border="0" vspace="0" width="534" class="mobile-full" alt="" style="border: 0px; max-width: 534px; display: block; border-radius: 0px; width: 100%; height: auto; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;" src="https://www.giga-hamburg.de/sites/default/files/styles/newsletter/public/giga_asia_dec2015_shanghaicooperationorganisation_reuters_chinadailyinformationcorp_cdic.jpg?itok=ALWVQ28B&amp;method=resize&amp;params=534%2Cnull"/></a>
+                  <a href="%ITEM_LINK%" target="_blank" style="text-decoration: none;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"><img hspace="0" border="0" vspace="0" width="534" class="mobile-full" alt="" style="border: 0px; max-width: 534px; display: block; border-radius: 0px; width: 100%; height: auto; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;" src="%ITEM_IMAGE_SRC%"/></a>
                 </td>
               </tr>
             </tbody>
@@ -156,7 +155,7 @@
   </tbody>
 </table>
 
-<!-- Copyright under image @todo -->
+<!-- Copyright under image -->
 <table class="vb-outer" width="100%" cellpadding="0" border="0" cellspacing="0" bgcolor="#bfbfbf" style="background-color: #bfbfbf;" id="ko_textBlock_12">
   <tbody>
     <tr>
@@ -166,8 +165,9 @@
           <table width="570" border="0" cellpadding="0" cellspacing="18" class="vb-container fullpad" bgcolor="#ffffff" style="border-collapse: separate; border-spacing: 18px 0; padding-left: 0; padding-right: 0; width: 100%; max-width: 570px; background-color: #ffffff;">
             <tbody>
               <tr>
-                <!-- @todo where does this copyright come from? -->
-                <td align="left" class="long-text links-color" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><p style="Margin: 1em 0px; Margin-bottom: 0px; Margin-top: 0px;">© Reuters / China Daily Information Corp. (CDIC)</p></td>
+                <td align="left" class="long-text links-color" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><p style="Margin: 1em 0px; Margin-bottom: 0px; Margin-top: 0px;">
+                  %ITEM_SOURCE%
+                </p></td>
               </tr>
             </tbody>
           </table>
