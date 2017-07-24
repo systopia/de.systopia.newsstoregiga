@@ -145,12 +145,16 @@ class CRM_Giga_AutoMail
 
     $html_items = '';
     foreach ($items as $item) {
+      $obj = unserialize($item['object']);
       $html_items .= strtr($this->item_tpl, [
-        '%ITEM_TITLE%'       => htmlspecialchars($item['title']),
-        '%ITEM_DESCRIPTION%' => $item['description'],
-        '%ITEM_TEASER%'      => htmlspecialchars($item['teaser']),
-        '%ITEM_LINK%'        => $item['uri'],
-        '%ITEM_IMAGE%'       => '',
+        '%ITEM_TITLE%'           => htmlspecialchars($item['title']),
+        '%ITEM_DESCRIPTION%'     => $item['description'],
+        '%ITEM_TEASER%'          => htmlspecialchars($item['teaser']),
+        '%ITEM_LINK%'            => $item['uri'],
+        '%ITEM_IMAGE_SRC%'       => $obj['item/enclosure@url'],
+        '%ITEM_SOURCE%'          => $obj['item/source'],
+        '%ITEM_DC:CREATOR%'      => $obj['item/dc:creator'],
+        '%ITEM_CONTENT_ENCODED%' => $obj['item/content:encoded'],
       ]);
     }
 
