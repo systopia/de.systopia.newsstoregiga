@@ -110,12 +110,21 @@ class CRM_Giga_AutoMail
     }
 
     // Got items. Create a mailing.
+    $from = civicrm_api3('OptionValue', 'getsingle', [
+      'sequential' => 1,
+      'return' => array("label"),
+      'is_default' => 1,
+      'option_group_id' => "from_email_address",
+    ]);
+    if (!preg_match('/^"([^"]+)"\s+<([^>]+)>$/', $from['label'], $from_email)) {
+      throw new \Exception("Cannot parse default email address, ensure it is in the format: \"name\" <email@example.com>");
+    }
     $mailing_result = civicrm_api3('Mailing', 'create', [
       'sequential' => 1,
       'name'       => ts(count($items)>1 ? count($items) . " items: " : '1 item: ') . $mailing_group['title'],
-      'from_name'  => "Testers", // @todo
-      'from_email' => "forums@artfulrobot.uk", // @todo
-      'subject'    => "test 1",
+      'from_name'  => $from_email[1],
+      'from_email' => $from_email[2],
+      'subject'    => "test 1", // Nb. this is hard coded... @todo ?
       'body_html'  => $this->getMailingHtml($items),
       'groups'     => ['include' => [$mailing_group['id']]],
     ]);
