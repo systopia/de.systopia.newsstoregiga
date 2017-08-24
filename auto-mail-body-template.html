@@ -157,8 +157,7 @@
                                     <table class="vb-content" border="0" cellspacing="9" cellpadding="0" width="276" style="border-collapse: separate; width: 100%;" align="left">
                                         <tbody><tr>
                                             <td width="100%" valign="top" align="left" style="font-weight: normal; text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #ffffff;">
-                                                <a style="text-decoration: none; color: #ffffff;" target="_new" href="[unsubscribe_link]">Unsubscribe</a>
-
+                                              <a style="text-decoration: none; color: #ffffff;" target="_new" href="{action.optOutUrl}">Unsubscribe</a>
                                             </td>
                                         </tr>
                                         </tbody></table>
@@ -285,8 +284,12 @@
             <div class="oldwebkit" style="max-width: 570px;">
                 <table width="570" border="0" cellpadding="0" cellspacing="18" class="vb-container fullpad" bgcolor="#ffffff" style="border-collapse: separate; border-spacing: 18px 8px; padding-left: 0; padding-right: 0; width: 100%; max-width: 570px; background-color: #ffffff;">
                     <tbody><tr>
-                        <td align="left" class="long-text links-color" style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><p style="Margin: 1em 0px; Margin-bottom: 0px; Margin-top: 0px;">This email was sent to: nikolai.roehl@gmail.com.<br/>You are receiving this as part of your GIGA email subscriptions. You can <a href='https://crm.giga-hamburg.de/sites/all/modules/civicrm/extern/url.php?u=31&amp;qid=' target="_blank" style="color: #0063A9;; text-decoration: none;">update your subscriptions </a>or <a href='https://crm.giga-hamburg.de/sites/all/modules/civicrm/extern/url.php?u=32&amp;qid=' target="_blank" style="color: #0063A9; text-decoration:
-none;">unsubscribe</a>.</p></td>
+                        <td align="left" class="long-text links-color" style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><p style="Margin: 1em 0px; Margin-bottom: 0px; Margin-top: 0px;">
+                        This email was sent to: {contact.email}.<br/>
+                        You are receiving this as part of your GIGA email subscriptions. You can
+                        <a href='{action.optOutUrl}' target="_blank" style="color: #0063A9;; text-decoration: none;">update your subscriptions </a>or
+                        <a href='{action.unsubscribeUrl}' target="_blank" style="color: #0063A9; text-decoration: none;">unsubscribe</a>.
+                         </p></td>
                     </tr>
                     </tbody></table>
             </div>
@@ -339,10 +342,10 @@ none;">unsubscribe</a>.</p></td>
             <div class="oldwebkit" style="max-width: 570px;">
                 <table width="570" border="0" cellpadding="0" cellspacing="18" class="vb-container fullpad" bgcolor="#ffffff" style="border-collapse: separate; border-spacing: 18px; padding-left: 0; padding-right: 0; width: 100%; max-width: 570px; background-color: #ffffff;">
                     <tbody><tr>
-                        <td align="left" class="long-text links-color" style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><div style="float: left;" data-mce-style="float: left;">GIGA German Institute of Global and Area Studies<br/>Leibniz-Institut für Globale und Regionale Studien&nbsp;<br/><br/>Neuer Jungfernstieg 21<br/>20354 Hamburg</div>
+                        <td align="left" class="long-text links-color" style="text-align: left; font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #3f3f3f;"><div style="float: left;" data-mce-style="float: left;">{domain.address}</div>
                             <div style="padding-left: 60%;">
-                           <a style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #6b6b6a;font-weight: normal;text-decoration: none;">www.giga-hamburg.de/en</a>  <br/>
-                                <a style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #6b6b6a;font-weight: normal;text-decoration: none;">publications@giga-hamburg.de <br/></a>
+                           <a style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #6b6b6a;font-weight: normal;text-decoration: none;" href="https://www.giga-hamburg.de/en">www.giga-hamburg.de/en</a><br/>
+                           <a style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #6b6b6a;font-weight: normal;text-decoration: none;" href="mailto:publications@giga-hamburg.de">publications@giga-hamburg.de</a><br/>
                                <p>
                                    <a href="https://www.facebook.com/GIGA.Institute" target="_blank" style=" float:left;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #6b6b6a;font-weight: normal;text-decoration: none;"><img alt=""  src="https://gallery.mailchimp.com/921cbf9aebe8abde581f5315b/images/d7ee4537-38d3-47e1-9f1f-c3767fd462f9.png" style="height: 12px !important;width: 12px !important;margin: 0px;border: 0;outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;" width="14"/></a>
 
@@ -367,6 +370,4 @@ none;">unsubscribe</a>.</p></td>
     </tr>
     </tbody></table>
 </center>
-
-<img src="https://crm.giga-hamburg.de/sites/all/modules/civicrm/extern/open.php?q=" width='1' height='1' alt='' border='0'/>
 </body></html>
