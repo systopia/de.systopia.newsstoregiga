@@ -119,15 +119,19 @@ class CRM_Giga_AutoMail
     if (!preg_match('/^"([^"]+)"\s+<([^>]+)>$/', $from['label'], $from_email)) {
       throw new \Exception("Cannot parse default email address, ensure it is in the format: \"name\" <email@example.com>");
     }
-    $mailing_result = civicrm_api3('Mailing', 'create', [
+    $params = [
       'sequential' => 1,
-      'name'       => ts(count($items)>1 ? count($items) . " items: " : '1 item: ') . $mailing_group['title'],
+      'name'       => ts(count($items)>1 ? count($items) . " items: " : '1 item: ') . $mailing_group['title'] . ' ' . date('j M Y'),
       'from_name'  => $from_email[1],
       'from_email' => $from_email[2],
       'subject'    => "test 1", // Nb. this is hard coded... @todo ?
       'body_html'  => $this->getMailingHtml($items),
       'groups'     => ['include' => [$mailing_group['id']]],
-    ]);
+      'header_id'  => '',
+      'footer_id'  => '',
+    ];
+    file_put_contents("/tmp/automail.html", $params['body_html']);
+    $mailing_result = civicrm_api3('Mailing', 'create', $params);
 
     return $mailing_result['id'];
   }
