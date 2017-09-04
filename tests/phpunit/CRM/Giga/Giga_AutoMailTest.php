@@ -52,6 +52,7 @@ class CRM_Giga_AutoMailTest extends \PHPUnit_Framework_TestCase implements Headl
           'title'       => 'Test item 1',
           'description' => '<p>This is the <strong>HTML</strong> 1.</p>',
           'teaser'      => 'Teaser text 1',
+          'object'      => '',
         ],
       ]);
     $this->assertEquals("<p>header</p><p class='item' >item: Test item 1\ndetail: Teaser text 1\n<a href='https://example.com/1' >Read More</a></p><p>footer</p>", $result);
@@ -72,6 +73,7 @@ class CRM_Giga_AutoMailTest extends \PHPUnit_Framework_TestCase implements Headl
         'title'       => 'Test item 1',
         'description' => '<p>This is the <strong>HTML</strong> 1.</p>',
         'teaser'      => 'Teaser text 1',
+        'object'      => '',
       ],
     ], $group_id);
     $this->assertGreaterThan(0, $mailing_id);
