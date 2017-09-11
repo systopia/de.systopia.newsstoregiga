@@ -140,7 +140,7 @@ class CRM_Giga_AutoMail
       'header_id'  => '',
       'footer_id'  => '',
     ];
-    file_put_contents("/tmp/automail.html", $params['body_html']);
+    // file_put_contents("/tmp/automail.html", $params['body_html']);
     $mailing_result = civicrm_api3('Mailing', 'create', $params);
 
     return $mailing_result['id'];
