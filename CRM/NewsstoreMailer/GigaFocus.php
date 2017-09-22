@@ -15,8 +15,8 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer
   /**
    * Base URL for header images.
    */
-  const GIGA_IMAGES_BASE_URL = 'http://ns47.localhost/sites/default/files/newsstore-template-images/';
-  // const GIGA_IMAGES_BASE_URL = 'https://www.giga-hamburg.de/sites/default/files/newsstore-template-images/';
+  // const GIGA_IMAGES_BASE_URL = 'http://ns47.localhost/sites/default/files/newsstore-template-images/';
+  const GIGA_IMAGES_BASE_URL = 'https://www.giga-hamburg.de/sites/default/files/newsstore-template-images/';
 
   /**
    * Map giga_type parameter to template data.
