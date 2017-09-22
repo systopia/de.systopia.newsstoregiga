@@ -83,7 +83,47 @@ function newsstoregiga_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function newsstoregiga_civicrm_managed(&$entities) {
-  _newsstoregiga_civix_civicrm_managed($entities);
+  // SLOW: _newsstoregiga_civix_civicrm_managed($entities);
+
+  $common = [
+    'module' => 'de.systopia.newsstoregiga',
+    'entity' => 'NewsStoreSource',
+  ];
+  $common_params = [
+    'version' => 3,
+    'retention_days' => 60,
+    'fetch_frequency' => "daily",
+    'type' => "Rss",
+  ];
+
+  foreach ([
+    'GIGA Focus Global EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/focus/49',
+    'GIGA Focus Global DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/focus/49',
+    'GIGA Focus Focus Afrika' => 'https://www.giga-hamburg.de/de/feed/civicrm/focus/46',
+    'GIGA Focus Focus Africa' => 'https://www.giga-hamburg.de/en/feed/civicrm/focus/46',
+    'GIGA Focus Asien' => 'https://www.giga-hamburg.de/de/feed/civicrm/focus/6',
+    'GIGA Focus Asia' => 'https://www.giga-hamburg.de/en/feed/civicrm/focus/6',
+    'GIGA Focus Lateinamerika' => 'https://www.giga-hamburg.de/de/feed/civicrm/focus/48',
+    'GIGA Focus Latin America' => 'https://www.giga-hamburg.de/en/feed/civicrm/focus/48',
+    'GIGA Focus Nahost' => 'https://www.giga-hamburg.de/de/feed/civicrm/focus/47',
+    'GIGA Focus Middle East' => 'https://www.giga-hamburg.de/en/feed/civicrm/focus/47',
+    'GIGA Working Papers DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/wp',
+    'GIGA Working Papers EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/wp',
+    'Africa Spectrum DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/news/1655',
+    'Africa Spectrum EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/news/1655',
+    'Journal of Current Chinese Affairs DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/news/1657',
+    'Journal of Current Chinese Affairs EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/news/1657',
+    'Journal of Politics in Latin America DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/news/1659',
+    'Journal of Politics in Latin America EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/news/1659',
+    'Journal of Current Southeast Asian Affairs DE' => 'https://www.giga-hamburg.de/de/feed/civicrm/news/1661',
+    'Journal of Current Southeast Asian Affairs EN' => 'https://www.giga-hamburg.de/en/feed/civicrm/news/1661',
+  ] as $name => $uri) {
+    $entities[] = $common + [
+      'name' => $name,
+      'params' => $common_params + [ 'uri' => $uri, 'name' => $name ]
+    ];
+  }
+
 }
 
 /**
