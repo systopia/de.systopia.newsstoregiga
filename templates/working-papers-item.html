@@ -25,16 +25,16 @@
                             <tbody>
                               <tr>
                                 <td valign="top" class="mcnTextContent" style="padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px;">
-                                  <h3>*|RSSITEM:AUTHOR|*</h3>
+                                  <h3>%ITEM_DC:CREATOR%</h3>
                                   <h1>
-                                    <a href="*|RSSITEM:URL|*" target="_blank" style="text-decoration:none;">*|RSSITEM:TITLE|*</a>
+                                    <a href="%ITEM_LINK%" target="_blank" style="text-decoration:none;">%ITEM_TITLE%</a>
                                   </h1>
                                 </td>
                               </tr>
                               <tr>
                                 <td valign="top" class="mcnTextContent" style="padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px;">
                                   <hr style="margin-bottom:0px;margin-top:0px;">
-                                  <!-- *|RSSFEED:TITLE|* | ///IFELSE TYPE | ///RSSNUMBER | *|RSSFEED:DATE|* --><span style="font-size: 12px">*|RSSITEM:CONTENT_FULL_TEXT|*</span>
+                                  <!-- *|RSSFEED:TITLE|* | ///IFELSE TYPE | ///RSSNUMBER | *|RSSFEED:DATE|* --><span style="font-size: 12px">%ITEM_CONTENT_ENCODED%</span>
                                   <hr style="margin-bottom:0px;margin-top:0px;">
                                 </td>
                               </tr>
@@ -52,9 +52,9 @@
                             <tbody>
                               <tr>
                                 <td class="mcnImageContent" valign="top" style="padding-right:9px;padding-left:9px;padding-top:0;padding-bottom:0;text-align:left;">
-                                  <a href="*|RSSITEM:URL|*" target="_blank">
-                                    <img alt="" src="*|RSSITEM:ENCLOSURE_URL|*" style="max-width:600px; padding-bottom: 0; display: inline !important; vertical-align: bottom; width: 600px;" class="mcnImage"></a>
-                                  <br><span style="font-size:10px;font-family:Helvetica;text-decoration: none;color: #000000;">*|RSSITEM:SOURCE|*</span>
+                                  <a href="%ITEM_LINK%" target="_blank">
+                                    <img alt="" src="%ITEM_IMAGE_SRC%" style="max-width:600px; padding-bottom: 0; display: inline !important; vertical-align: bottom; width: 600px;" class="mcnImage"></a>
+                                  <br><span style="font-size:10px;font-family:Helvetica;text-decoration: none;color: #000000;">%ITEM_SOURCE%</span>
                                 </td>
                               </tr>
                             </tbody>
@@ -75,8 +75,8 @@
                             <tbody>
                               <tr>
                                 <td valign="top" class="mcnTextContent" style="padding-right:18px;padding-bottom:9px;padding-left:18px;">
-                                  *|RSSITEM:CONTENT|*
-                                  <br><a href="*|RSSITEM:URL|*" target="_blank">Continue reading</a>
+                                  %ITEM_DESCRIPTION%
+                                  <br><a href="%ITEM_LINK%" target="_blank">Continue reading</a>
                                 </td>
                               </tr>
                               <tr>

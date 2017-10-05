@@ -5,19 +5,8 @@
  * Formatters should implement getMailingHtml() and getMailingSubject() and
  * configure() if they need to take input params.
  */
-class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer
+class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer_GigaCommon
 {
-  /**
-   * List of tags we allow to pass from RSS items direct to mailings.
-   */
-  const PERMITTED_HTML_TAGS= '<br><p><h1><h2><h3><h4><h5><h6><ul><ol><li><dd><dt><dl><hr><embed><object><a><div><table><thead><tbody><tr><th><td><strong><em><b><i><img>';
-
-  /**
-   * Base URL for header images.
-   */
-  // const GIGA_IMAGES_BASE_URL = 'http://ns47.localhost/sites/default/files/newsstore-template-images/';
-  const GIGA_IMAGES_BASE_URL = 'https://www.giga-hamburg.de/sites/default/files/newsstore-template-images/';
-
   /**
    * Map giga_type parameter to template data.
    */
@@ -79,7 +68,7 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer
     'de-global' => [
       'item_template' => 'focus-item.html',
       'body_template' => 'focus-body-en.html',
-      'header'        => 'focus_global.jpg', // ???
+      'header'        => 'focus_global.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
     'en-africa' => [
@@ -95,24 +84,6 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
       ],
   ];
-
-  /**
-   * Which config set is chosen.
-   */
-  protected $giga_config;
-
-  /**
-   * Configure from input params according to this formatter's requirements.
-   *
-   * @param array $params
-   * @return CRM_NewsstoreMailer $this
-   */
-  public function configure($params=[]) {
-    if (empty($params['giga_type']) || !isset($this->giga_type_map[$params['giga_type']])) {
-      throw new \Exception("Missing or invalid giga_type parameter. Should be one of: " . implode(', ', array_keys($this->giga_type_map)));
-    }
-    $this->giga_config = $this->giga_type_map[$params['giga_type']];
-  }
 
 
   /**
@@ -147,12 +118,4 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer
 
     return $body_html;
   }
-  /**
-   * Create the subject.
-   */
-  public function getMailingSubject($items) {
-    $first_item = reset($items);
-    return str_replace('%ITEM_TITLE%', $first_item['title'], $this->giga_config['subject']);
-  }
 }
-
