@@ -164,6 +164,12 @@ function newsstoregiga_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _newsstoregiga_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
+function newsstoregiga_civicrm_permission(&$permissions) {
+  $permissions['access GIGA subscriptions API'] = [
+    ts('NewsStoreGIGA: Access GIGA subscriptions API'),
+    ts('This should be given to anonymous users since the website that consumes this API is not authenticated.'),
+  ];
+}
 /**
  * Functions below this ship commented out. Uncomment as required.
  *
