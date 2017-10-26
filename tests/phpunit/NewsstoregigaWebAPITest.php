@@ -82,37 +82,55 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
     $result = $api->getContactHash();
     $this->assertRegExp('/^[a-zA-Z0-9_-]+$/', $result);
   }
+  /**
+   * Test things fail if the pre shared key is wrong.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   */
   public function testInvalidKey() {
     $api = new CRM_Newsstoregiga_Page_WebAPI();
     $api->request_query = [
       'psk' => 'incorrect',
       'email' => 'wilma@example.com',
     ];
-    $fail = FALSE;
-    try {
-      $result = $api->checkPSK();
-      $fail = TRUE;
-    }
-    catch (Exception $e) {
-      $this->assertEquals(401, $e->getCode());
-    }
-    if ($fail) {
-      $this->fail('Failed to reject invalid key');
-    }
+    $api->checkPSK();
   }
+  /**
+   * Test things fail if pre shared key is missing.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   */
   public function testMissingKey() {
     $api = new CRM_Newsstoregiga_Page_WebAPI();
-    $fail = FALSE;
-    try {
-      $result = $api->checkPSK();
-      $fail = TRUE;
-    }
-    catch (Exception $e) {
-      $this->assertEquals(401, $e->getCode());
-    }
-    if ($fail) {
-      $this->fail('Failed to reject invalid key');
-    }
+    $api->request_query = [];
+    $api->checkPSK();
+  }
+  /**
+   * Test things fail if pre shared key is missing.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   */
+  public function testMissingHash() {
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $result = $api->getContactData();
+  }
+  /**
+   * Test things fail if pre shared key is missing.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   */
+  public function testInvalidHash() {
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => 'this is wrong',
+    ];
+    $result = $api->getContactData();
   }
   public function testGetContactData() {
     $api = new CRM_Newsstoregiga_Page_WebAPI();
@@ -140,6 +158,36 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       $this->assertArrayHasKey($api_name, $result);
       $this->assertEquals(0, $result[$api_name]);
     }
+  }
+  /**
+   * We want the system to fail if multiple contacts own the same email since
+   * this means we cannot safely authenticate by email.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   * @expectedExceptionMessage Bad Request. Problem with input email.
+   */
+  public function testGetContactDataFailsIfEmailOwnedByMultipleContacts() {
+
+    // Create a second contact.
+    $result = civicrm_api3('Contact', 'create', [
+      'first_name' => 'Betty',
+      'last_name' => 'Rubble',
+      'contact_type' => 'Individual',
+    ]);
+    $this->fixtures['contacts'][1] = ['contact_id' => $result['id'], 'email_ids' => []];
+    $result = civicrm_api3('Email', 'create', [
+      'contact_id' => $result['id'],
+      'email' => 'wilma@example.com', // Same as main contact.
+    ]);
+    $this->fixtures['contacts'][0]['email_ids'][0] = $result['id'];
+
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $hash = $api->getContactHash();
   }
   public function testSetContactDataChangesNameAndSubscribes() {
     $api = new CRM_Newsstoregiga_Page_WebAPI();
@@ -241,6 +289,60 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       $this->assertArrayHasKey($api_name, $result);
       $expect = ($api_name == 'giga_en_latinamerica') ? 1 : 0;
       $this->assertEquals($expect, $result[$api_name]);
+    }
+  }
+  public function testSetContactDataChangesEmail() {
+    // Adjust the fixture, adding in a 2nd email. We'll check this is not touched.
+    $other_email = civicrm_api3('Email', 'create', [
+      'contact_id' => $this->fixtures['contacts'][0]['contact_id'],
+      'email' => 'foo@example.com',
+      'is_primary' => TRUE,
+    ]);
+    $this->fixtures['contacts'][0]['email_ids'][] = $other_email['id'];
+
+
+    // Get our access hash.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $hash = $api->getContactHash();
+
+    // Send the update.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'new_email' => 'wilma2@example.com',
+    ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => $hash,
+    ];
+    $api->setContactData();
+
+    // Now fetch data and check it changed.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [ ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma2@example.com', // use new email to look up.
+      'hash' => $hash,
+    ];
+    $result = $api->getContactData();
+
+    // Check correct contact returned.
+    $this->assertEquals($this->fixtures['contacts'][0]['contact_id'], $result['contact_id']);
+    $this->assertEquals('wilma2@example.com', $result['email']);
+
+    // Check that email, and only that email, was changed.
+    foreach ([
+      $this->fixtures['contacts'][0]['email_ids'][0] => 'wilma2@example.com',
+      $this->fixtures['contacts'][0]['email_ids'][1] => 'foo@example.com',
+    ] as $email_id => $expected_value) {
+      $result = civicrm_api3('email', 'get', ['id' => $email_id, 'return' => 'email', 'sequential' => 1]);
+      $this->assertEquals($expected_value, $result['values'][0]['email']);
     }
   }
 }

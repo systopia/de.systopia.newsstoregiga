@@ -75,7 +75,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
           'setContactData',
           'getContactHash'])) {
           CRM_Core_Error::debug_log_message(__CLASS__ . ': Missing or unknown method in request');
-          throw new NewsstoregigaWebAPIException('Bad request. Method name', 400);
+          throw new CRM_Newsstoregiga_WebAPIException('Bad request. Method name', 400);
       }
       // Parse the data sent.
       $request_body = file_get_contents('php://input');
@@ -96,16 +96,16 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
           exit;
         }
       }
-      catch (NewsstoregigaWebAPIException $e) {
+      catch (CRM_Newsstoregiga_WebAPIException $e) {
         // Handle this in the next catch.
         throw $e;
       }
       catch (Exception $e) {
         // Generic extensions, wrap them.
-        throw new NewsstoregigaWebAPIException( 'Server Error. Exception: ' . $e->getMessage(), 500);
+        throw new CRM_Newsstoregiga_WebAPIException( 'Server Error. Exception: ' . $e->getMessage(), 500);
       }
     }
-    catch (NewsstoregigaWebAPIException $e) {
+    catch (CRM_Newsstoregiga_WebAPIException $e) {
       CRM_Core_Error::debug_log_message(__CLASS__ . ': FATAL ERROR ' . $code . ' ' . $msg);
       header("$_SERVER[SERVER_PROTOCOL] $code $msg");
       $data_response = json_encode(['error' => $msg]);
@@ -121,7 +121,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
    */
   public function checkPSK() {
     if (empty($this->request_query['psk']) || $this->request_query['psk'] !== GIGA_EMAIL_SUBSCRIPTION_API_PSK) {
-      throw new NewsstoregigaWebAPIException('Unauthorised. Key failure.', 401);
+      throw new CRM_Newsstoregiga_WebAPIException('Unauthorised. Key failure.', 401);
     }
   }
   /**
@@ -249,7 +249,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
    */
   public function findContactByEmail($validate_checksum=TRUE) {
     if (empty($this->request_query['email'])) {
-      throw new NewsstoregigaWebAPIException('Bad Request. email missing', 400);
+      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. email missing', 400);
     }
 
     // Look up the email.
@@ -271,13 +271,13 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       $emails[$priority] = $_['id'];
     }
     if (count($contacts) != 1) {
-      throw new NewsstoregigaWebAPIException('Bad Request. Problem with input email.', 400);
+      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Problem with input email.', 400);
     }
 
     if ($validate_checksum) {
       $hash = isset($this->request_query['hash']) ? $this->request_query['hash'] : '';
       if (!CRM_Contact_BAO_Contact_Utils::validChecksum($contact_id, $hash)) {
-        throw new NewsstoregigaWebAPIException('Unauthorised. Invalid hash.', 401);
+        throw new CRM_Newsstoregiga_WebAPIException('Unauthorised. Invalid hash.', 401);
       }
     }
 
@@ -319,4 +319,3 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
   }
 }
 
-class NewsstoregigaWebAPIException extends Exception {}
