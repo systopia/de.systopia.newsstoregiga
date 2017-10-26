@@ -80,7 +80,8 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $result = $api->getContactHash();
-    $this->assertRegExp('/^[a-zA-Z0-9_-]+$/', $result);
+    $this->assertArrayHasKey('hash', $result);
+    $this->assertRegExp('/^[a-zA-Z0-9_-]+$/', $result['hash']);
   }
   /**
    * Test things fail if the pre shared key is wrong.
@@ -140,6 +141,7 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $hash = $api->getContactHash();
+    $hash = $hash['hash'];
 
     $api = new CRM_Newsstoregiga_Page_WebAPI();
     $api->request_data = [];
@@ -188,6 +190,7 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $hash = $api->getContactHash();
+    $hash = $hash['hash'];
   }
   public function testSetContactDataChangesNameAndSubscribes() {
     $api = new CRM_Newsstoregiga_Page_WebAPI();
@@ -197,6 +200,7 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $hash = $api->getContactHash();
+    $hash = $hash['hash'];
 
     $api = new CRM_Newsstoregiga_Page_WebAPI();
     $api->request_data = [
@@ -241,6 +245,7 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $hash = $api->getContactHash();
+    $hash = $hash['hash'];
 
     // Do subscription.
     $api = new CRM_Newsstoregiga_Page_WebAPI();
@@ -309,6 +314,7 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       'email' => 'wilma@example.com',
     ];
     $hash = $api->getContactHash();
+    $hash = $hash['hash'];
 
     // Send the update.
     $api = new CRM_Newsstoregiga_Page_WebAPI();
@@ -344,5 +350,89 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
       $result = civicrm_api3('email', 'get', ['id' => $email_id, 'return' => 'email', 'sequential' => 1]);
       $this->assertEquals($expected_value, $result['values'][0]['email']);
     }
+  }
+  /**
+   * We need to be able to create contacts.
+   */
+  public function testAddSubscriberCreatesContact() {
+    // Send the update.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'new_email'            => 'betty@example.com',
+      'first_name'           => 'Betty',
+      'last_name'            => 'Rubble',
+      'giga_en_latinamerica' => 1,
+    ];
+    $api->request_query = ['psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK];
+    $api->addSubscriber();
+
+    // Check the email was created.
+    $result = civicrm_api3('Email', 'get', ['email' => 'betty@example.com', 'sequential' => 1]);
+    $this->assertEquals(1, $result['count']);
+    $contact_id = $result['values'][0]['contact_id'];
+
+    // Check the contact was created correctly.
+    $result = civicrm_api3('Contact', 'get', ['id' => $contact_id]);
+    $this->assertEquals(1, $result['count']);
+    $this->assertEquals('Betty', $result['values'][$contact_id]['first_name']);
+    $this->assertEquals('Rubble', $result['values'][$contact_id]['last_name']);
+
+    // Check the contact was added to the group.
+    $group_id = $this->fixtures['groups']['giga_en_latinamerica'];
+    $result = civicrm_api3('Contact', 'getcount', [
+      'id' => $contact_id,
+      'group' => $group_id,
+    ]);
+    $this->assertEquals(1, $result);
+  }
+  /**
+   * Check we get a hash back if we try to subscribe someone already subscribed.
+   */
+  public function testAddSubscriberFailsHelpfullyIfEmailKnown() {
+
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'new_email'            => 'wilma@example.com',
+      'first_name'           => 'Betty',
+      'last_name'            => 'Rubble',
+      'giga_en_latinamerica' => 1,
+    ];
+    $api->request_query = ['psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK];
+    $result = $api->addSubscriber();
+
+    $this->assertInternalType('array', $result);
+    $this->assertArrayHasKey('error', $result);
+    $this->assertEquals('Authentication Required', $result['error']);
+    $this->assertArrayHasKey('hash', $result);
+    $this->assertRegExp('/^[a-zA-Z0-9_-]+$/', $result['hash']);
+  }
+  /**
+   * We should receive an Unknown prefix error.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   * @expectedExceptionMessage Bad Request. Unknown prefix
+   */
+  public function testSetContactDataErrorsWithUnknownPrefix() {
+    // Get our access hash.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $hash = $api->getContactHash();
+    $hash = $hash['hash'];
+
+    // Send the update.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'individual_prefix' => 'Moogle.',
+    ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => $hash,
+    ];
+    $result = $api->setContactData();
   }
 }

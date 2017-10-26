@@ -73,14 +73,15 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
         || !in_array($_GET['method'], [
           'getContactData',
           'setContactData',
-          'getContactHash'])) {
+          'getContactHash',
+          'addSubscriber'])) {
           CRM_Core_Error::debug_log_message(__CLASS__ . ': Missing or unknown method in request');
           throw new CRM_Newsstoregiga_WebAPIException('Bad request. Method name', 400);
       }
       // Parse the data sent.
       $request_body = file_get_contents('php://input');
       if ($request_body) {
-        $this->request_data = json_decode($request_body);
+        $this->request_data = json_decode($request_body, TRUE);
       }
       // Process the call.
       civicrm_initialize();
@@ -106,6 +107,8 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       }
     }
     catch (CRM_Newsstoregiga_WebAPIException $e) {
+      $code = $e->getCode();
+      $msg = $e->getMessage();
       CRM_Core_Error::debug_log_message(__CLASS__ . ': FATAL ERROR ' . $code . ' ' . $msg);
       header("$_SERVER[SERVER_PROTOCOL] $code $msg");
       $data_response = json_encode(['error' => $msg]);
@@ -130,7 +133,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
   public function getContactHash() {
     $contact_id = $this->findContactByemail(FALSE);
     $checksum = CRM_Contact_BAO_Contact_Utils::generateChecksum($contact_id, NULL, 24);
-    return $checksum;
+    return ['hash' => $checksum];
   }
   /**
    * Create checksum for the contact identified by the email given.
@@ -148,8 +151,8 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     // @todo Institution/Organisation
     // @todo Professional background
     // Each mapped group.
-    foreach (static::$mapped_groups as $api_name => $civicrm_group_name) {
-      $group_id = $this->getGroupIdFromName($civicrm_group_name);
+    foreach (static::$mapped_groups as $api_name => $civicrm_group_title) {
+      $group_id = $this->getGroupIdFromTitle($civicrm_group_title);
       if (!$group_id) {
         // Cannot be in a group that does not exist!
         $result = FALSE;
@@ -166,7 +169,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     return $response;
   }
   /**
-   * Create checksum for the contact identified by the email given.
+   * Update an existing contact.
    */
   public function setContactData() {
     // Check hash and get contact data.
@@ -180,6 +183,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       $params[$field] = $this->request_data[$field];
     }
     if ($params) {
+      $this->validatePrefix();
       // Write changes to Contact entity.
       $params += ['id' => $this->contact_id];
       $result = civicrm_api3('Contact', 'create', $params);
@@ -198,13 +202,13 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
 
     // Update group membership.
     $groups_to_remove = $groups_to_add = [];
-    foreach (static::$mapped_groups as $api_name => $civicrm_group_name) {
+    foreach (static::$mapped_groups as $api_name => $civicrm_group_title) {
       if (isset($this->request_data[$api_name])
           && isset($current_data[$api_name])
           && $current_data[$api_name] != $this->request_data[$api_name]
           ) {
         // Look up the group ID.
-        $group_id = $this->getGroupIdFromName($civicrm_group_name);
+        $group_id = $this->getGroupIdFromTitle($civicrm_group_title);
         if (!$group_id) {
           // If the group doesn't exist (any longer) then we cannot
           // process it.
@@ -241,19 +245,131 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     return [];
   }
   /**
+   * Create a contact.
+   *
+   * If the email exists against multiple contacts, we cannot continue.
+   *
+   * If the email exists against one contact, we cannot continue but we return
+   * an 'Authentication Required' error and helpfully include the hash required
+   * to authenticate. The website should then send an email to the person with
+   * the authentication link in it. This will ensure the person submitting the
+   * form has control over the email address.
+   *
+   * If the email is not found, a new record is created and an empty array is returned (like from setContactData).
+   *
+   * @return Array.
+   */
+  public function addSubscriber() {
+
+    // We require an email.
+    if (empty($this->request_data['new_email'])) {
+      throw new CRM_Newsstoregiga_WebAPIException('Email is required to create a contact.', 400);
+    }
+
+    // Do we already have a contact record for this email?
+    $contact_id = $this->findContactByemail($validate_checksum=FALSE, $ok_if_not_found=TRUE, $this->request_data['new_email']);
+
+    if ($contact_id) {
+      // We already have a contact ID.
+      // Continuing could result in someone changing someone else's data - we
+      // only allow changes to data after authentication via the hash sent by
+      // email route.
+      $checksum = CRM_Contact_BAO_Contact_Utils::generateChecksum($contact_id, NULL, 24);
+      return [
+        'error' => 'Authentication Required',
+        'hash'  => $checksum,
+      ];
+    }
+
+    // OK, email did not exist so we're OK to create the contact now.
+
+    // Check we have all the required data.
+
+    // We require at least one subscription, otherwise what's the point.
+    $groups_to_add = [];
+    foreach (static::$mapped_groups as $api_name => $civicrm_group_title) {
+      if (!empty($this->request_data[$api_name])) {
+
+        $group_id = $this->getGroupIdFromTitle($civicrm_group_title);
+        if (!$group_id) {
+          // If the group doesn't exist (any longer) then we cannot
+          // process it.
+          continue;
+        }
+
+        if (!empty($this->request_data[$api_name])) {
+          $groups_to_add[] = $group_id;
+        }
+      }
+    }
+    if (!$groups_to_add){
+      throw new CRM_Newsstoregiga_WebAPIException('At least one subscription is required.', 400);
+    }
+
+    // We require at least something of a name.
+    $params = [];
+    foreach (['individual_prefix', 'first_name', 'last_name'] as $field) {
+      if (!empty($this->request_data[$field])) {
+        $params[$field] = $this->request_data[$field];
+      }
+    }
+    if (!$params) {
+      throw new CRM_Newsstoregiga_WebAPIException('Name is required to create a contact.', 400);
+    }
+    $this->validatePrefix();
+
+    // OK, all looks fine to proceed. Write changes to Contact entity.
+    $params['contact_type'] = 'Individual';
+    $result = civicrm_api3('Contact', 'create', $params);
+    $this->contact_id = $result['id'];
+
+    // Set email, if we have new_email.
+    $result = civicrm_api3('Email', 'create', [
+      'contact_id'  => $this->contact_id,
+      'email'       => $this->request_data['new_email'],
+      'is_bulkmail' => 1,
+    ]);
+    $this->email_id = $result['id'];
+
+    // Update group membership.
+    foreach ($groups_to_add as $group_id) {
+      civicrm_api3('GroupContact', 'create', [
+        'group_id'   => $group_id,
+        'contact_id' => $this->contact_id,
+        'status'     => 'Added',
+        'email_id'   => $this->email_id,
+      ]);
+    }
+
+    return [];
+  }
+  /**
    * Find the contact by email.
    *
    * The email must belong to one contact and one contact only.
+   *
    * @param bool $validate_checksum If set a contact is only returned if the hash is valid.
-   * @return int contact id.
+   *
+   * @param bool $ok_if_not_found If set and the email is not found at all,
+   *        just return NULL instead of throwing an exception. Used by the
+   *        addSubscriber method.
+   *
+   * @return int|NULL contact id.
+   *
+   * @throws CRM_Newsstoregiga_WebAPIException if the email is missing, not
+   *         found, or belongs to more than one contact.
    */
-  public function findContactByEmail($validate_checksum=TRUE) {
-    if (empty($this->request_query['email'])) {
-      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. email missing', 400);
+  public function findContactByEmail($validate_checksum=TRUE, $ok_if_not_found=FALSE, $email=NULL) {
+    if ($email === NULL) {
+      // Expect email in the request query.
+      if (empty($this->request_query['email'])) {
+        throw new CRM_Newsstoregiga_WebAPIException('Bad Request. email missing', 400);
+      }
+      $email = $this->request_query['email'];
     }
 
     // Look up the email.
-    $result = civicrm_api3('Email', 'get', ['email' => $this->request_query['email']]);
+    $result = civicrm_api3('Email', 'get', ['email' => $email]);
     // Count unique contacts (and email can sometimes be in twice but against
     // the same contact).
     $contacts = [];
@@ -270,7 +386,12 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       }
       $emails[$priority] = $_['id'];
     }
+    if (count($contacts) == 0 && $ok_if_not_found) {
+      // Email was not found, but that's ok.
+      return;
+    }
     if (count($contacts) != 1) {
+      // Either not found (and that's not OK), or found against multiple contacts.
       throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Problem with input email.', 400);
     }
 
@@ -302,20 +423,31 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
    *
    * Sending it Ids seems more reliable, so we do that work here.
    */
-  public function getGroupIdFromName($group_name) {
+  public function getGroupIdFromTitle($group_title) {
     if (!isset($this->group_id_cache)) {
       $result = civicrm_api3('Group', 'get', [
-        'name' => ['IN' => array_values(static::$mapped_groups)],
-        'return' => 'id,name',
+        'title' => ['IN' => array_values(static::$mapped_groups)],
+        'return' => 'id,title',
       ]);
       $this->group_id_cache = [];
       foreach ($result['values'] as $_) {
-        $this->group_id_cache[$_['name']] = $_['id'];
+        $this->group_id_cache[$_['title']] = $_['id'];
       }
     }
-    return isset($this->group_id_cache[$group_name])
-      ? $this->group_id_cache[$group_name]
+    return isset($this->group_id_cache[$group_title])
+      ? $this->group_id_cache[$group_title]
       : FALSE;
+  }
+  public function validatePrefix() {
+    if (!empty($this->request_data['individual_prefix'])) {
+      $result = civicrm_api3('OptionValue', 'getcount', [
+        'option_group_id' => "individual_prefix",
+        'name' => $this->request_data['individual_prefix'],
+      ]);
+      if (!$result) {
+        throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Unknown prefix', 400);
+      }
+    }
   }
 }
 
