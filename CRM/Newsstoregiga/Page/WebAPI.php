@@ -263,7 +263,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
 
     // We require an email.
     if (empty($this->request_data['new_email'])) {
-      throw new CRM_Newsstoregiga_WebAPIException('Email is required to create a contact.', 400);
+      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Email is required to create a contact.', 400);
     }
 
     // Do we already have a contact record for this email?
@@ -303,7 +303,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       }
     }
     if (!$groups_to_add){
-      throw new CRM_Newsstoregiga_WebAPIException('At least one subscription is required.', 400);
+      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. At least one subscription is required.', 400);
     }
 
     // We require at least something of a name.
@@ -314,7 +314,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       }
     }
     if (!$params) {
-      throw new CRM_Newsstoregiga_WebAPIException('Name is required to create a contact.', 400);
+      throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Name is required to create a contact.', 400);
     }
     $this->validatePrefix();
 
