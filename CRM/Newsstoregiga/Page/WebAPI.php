@@ -30,7 +30,7 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     'giga_en_africa' => 'GIGA Focus Africa - EN',
     'giga_de_afrika' => 'GIGA Focus Afrika - DE',
 
-    'journal_africa_spectrum_en' => 'GIGA Journal Afrika Spectrum - EN',
+    'journal_africa_spectrum_en' => 'GIGA Journal Africa Spectrum - EN',
     'journal_africa_spectrum_de' => 'GIGA Journal Africa Spectrum - DE',
     'journal_chinese_affairs_en' => 'GIGA Journal of Current Chinese Affairs - EN',
     'journal_chinese_affairs_de' => 'GIGA Journal of Current Chinese Affairs - DE',
