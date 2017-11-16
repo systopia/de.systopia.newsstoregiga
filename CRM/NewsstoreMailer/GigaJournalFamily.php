@@ -17,7 +17,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Africa Spectrum',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'africa-spectrum-en' => [
       'item_template' => 'journal-family-item.html',
@@ -25,7 +24,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Africa Spectrum',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'chinese-affairs-de' => [
       'item_template' => 'journal-family-item.html',
@@ -33,7 +31,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Current Southeast Asian Affairs',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'chinese-affairs-en' => [
       'item_template' => 'journal-family-item.html',
@@ -41,7 +38,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Current Southeast Asian Affairs',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'latin-america-de' => [
       'item_template' => 'journal-family-item.html',
@@ -49,7 +45,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Politics in Latin America',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'latin-america-en' => [
       'item_template' => 'journal-family-item.html',
@@ -57,7 +52,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Politics in Latin America',
       'family'        => '', // @todo
-      'intro'         => '', // @todo
     ],
     'se-asia-de' => [
       'item_template' => 'journal-family-item.html',
@@ -65,7 +59,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Current Southeast Asian Affairs',
       'family'        => 'JOURNAL OF CURRENT SOUTHEAST ASIAN AFFAIRS', // @todo
-      'intro'         => "The journal offers insights on policy implementation in the Philippines, Myanmar's foreign policy, territorial disputes and nationalism in Vietnam and China, and other issues.",
     ],
     'se-asia-en' => [
       'item_template' => 'journal-family-item.html',
@@ -73,7 +66,6 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Current Southeast Asian Affairs',
       'family'        => 'JOURNAL OF CURRENT SOUTHEAST ASIAN AFFAIRS',
-      'intro'         => "The journal offers insights on policy implementation in the Philippines, Myanmar's foreign policy, territorial disputes and nationalism in Vietnam and China, and other issues.",
     ],
   ];
 
@@ -83,11 +75,10 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
   public function getMailingHtml($items) {
 
     // As others.
-    $html = parent::getMailingHtml();
+    $html = parent::getMailingHtml($items);
     // ... except we also need to inject the name of the journal.
     $html = strtr($html, [
       '%FAMILY_TITLE%' => $this->giga_config['family'],
-      '%FAMILY_INTRO%' => $this->giga_config['intro'],
     ]);
 
     return $html;
