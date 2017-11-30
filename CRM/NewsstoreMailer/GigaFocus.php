@@ -97,7 +97,7 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer_GigaCommon
 
     $html_items = '';
     foreach ($items as $item) {
-      $obj = unserialize($item['object']);
+      $obj = $item['object'];
       $html_items .= strtr($item_tpl, [
         '%ITEM_TITLE%'           => htmlspecialchars($item['title']),
         '%ITEM_DESCRIPTION%'     => strip_tags($obj['item/description'], static::PERMITTED_HTML_TAGS),
