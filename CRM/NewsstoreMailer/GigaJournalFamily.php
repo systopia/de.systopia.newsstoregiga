@@ -79,6 +79,7 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
     // ... except we also need to inject the name of the journal.
     $html = strtr($html, [
       '%FAMILY_TITLE%' => $this->giga_config['family'],
+      '%SUBJECT%' => $this->getMailingSubject($items),
     ]);
 
     return $html;

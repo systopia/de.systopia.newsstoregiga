@@ -69,6 +69,7 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
     $body_html = strtr($body_tpl, [
       '%HEADER_IMG_URL%' => static::GIGA_IMAGES_BASE_URL . $this->giga_config['header'],
       '%ITEMS%' => $html_items,
+      '%SUBJECT%' => $this->getMailingSubject($items),
     ]);
 
     return $body_html;
