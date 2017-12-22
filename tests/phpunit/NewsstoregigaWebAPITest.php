@@ -484,4 +484,45 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
     ];
     $result = $api->setContactData();
   }
+  /**
+   * Check that passing empty professional background / institution is accepted.
+   *
+   */
+  public function testSetContactDataWithBlankCustomData() {
+    // Get our access hash.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $hash = $api->getContactHash();
+    $hash = $hash['hash'];
+
+    // Send the update.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'professional_background' => '',
+      'institution' => '',
+    ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => $hash,
+    ];
+    $result = $api->setContactData();
+
+    // Now fetch data and check it changed.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [ ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => $hash,
+    ];
+    $result = $api->getContactData();
+
+    $this->assertEquals('', $result['professional_background']);
+    $this->assertEquals('', $result['institution']);
+  }
 }

@@ -215,13 +215,13 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     if (isset($this->request_data['institution'])) {
       // API sent Instituion field.
       if ($this->request_data['institution'] != $current_data['institution']) {
-        $params["custom_$this->institution_field_id"] = $this->request_data['institution'] ? $this->request_data['institution'] : NULL;
+        $params["custom_$this->institution_field_id"] = $this->request_data['institution'] ? $this->request_data['institution'] : '';
       }
     }
     if (isset($this->request_data['professional_background'])) {
       // API sent Professional Background field.
       if ($this->request_data['professional_background'] != $current_data['professional_background']) {
-        $params["custom_$this->professional_background_field_id"] = $this->request_data['professional_background'] ? $this->request_data['professional_background'] : NULL;
+        $params["custom_$this->professional_background_field_id"] = $this->request_data['professional_background'] ? $this->request_data['professional_background'] : '';
       }
     }
 
