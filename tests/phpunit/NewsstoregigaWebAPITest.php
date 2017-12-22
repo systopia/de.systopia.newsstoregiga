@@ -22,6 +22,15 @@ use Civi\Test\TransactionalInterface;
 class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   public $fixtures = [];
 
+  /**
+   * @var int CiviCRM field ID, as used in API calls like custom_NN.
+   */
+  protected $professional_background_field_id;
+  /**
+   * @var int CiviCRM field ID, as used in API calls like custom_NN.
+   */
+  protected $institution_field_id;
+
   public function setUpHeadless() {
     // Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
     // See: https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
@@ -44,11 +53,20 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
     }
 
     // Create a contacts.
-    $result = civicrm_api3('Contact', 'create', [
+
+    // We need to set the contact's custom data.
+    require_once 'CRM/Core/BAO/CustomField.php';
+    $this->institution_field_id = CRM_Core_BAO_CustomField::getCustomFieldID('Institution_Organisation', 'Subscriber_Details');
+    $this->professional_background_field_id = CRM_Core_BAO_CustomField::getCustomFieldID('professional_background', 'Subscriber_Details');
+
+    $params = [
       'first_name' => 'Wilma',
       'last_name' => 'Flintstone',
       'contact_type' => 'Individual',
-    ]);
+      "custom_$this->institution_field_id" => 'Cave Institution',
+      "custom_$this->professional_background_field_id" => 'business',
+    ];
+    $result = civicrm_api3('Contact', 'create', $params);
     $this->fixtures['contacts'][0] = ['contact_id' => $result['id'], 'email_ids' => []];
     $result = civicrm_api3('Email', 'create', [
       'contact_id' => $result['id'],
@@ -156,6 +174,8 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
     $this->assertEquals('Wilma', $result['first_name']);
     $this->assertEquals('Flintstone', $result['last_name']);
     $this->assertEquals('wilma@example.com', $result['email']);
+    $this->assertEquals('business', $result['professional_background']);
+    $this->assertEquals('Cave Institution', $result['institution']);
     foreach (CRM_Newsstoregiga_Page_WebAPI::$mapped_groups as $api_name => $civi_name) {
       $this->assertArrayHasKey($api_name, $result);
       $this->assertEquals(0, $result[$api_name]);
@@ -427,6 +447,35 @@ class NewsstoregigaWebAPITest extends \PHPUnit_Framework_TestCase implements Hea
     $api = new CRM_Newsstoregiga_Page_WebAPI();
     $api->request_data = [
       'individual_prefix' => 'Moogle.',
+    ];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+      'hash' => $hash,
+    ];
+    $result = $api->setContactData();
+  }
+  /**
+   * We should receive an Unknown Professional Background error.
+   *
+   * @expectedException CRM_Newsstoregiga_WebAPIException
+   * @expectedExceptionMessage Bad Request. Unknown professional background value
+   */
+  public function testSetContactDataErrorsWithUnknownProfessionalBackground() {
+    // Get our access hash.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [];
+    $api->request_query = [
+      'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,
+      'email' => 'wilma@example.com',
+    ];
+    $hash = $api->getContactHash();
+    $hash = $hash['hash'];
+
+    // Send the update.
+    $api = new CRM_Newsstoregiga_Page_WebAPI();
+    $api->request_data = [
+      'professional_background' => 'Moogle.',
     ];
     $api->request_query = [
       'psk' => GIGA_EMAIL_SUBSCRIPTION_API_PSK,

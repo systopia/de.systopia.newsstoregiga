@@ -18,6 +18,9 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
 
   /** Cache group names */
   public $group_id_cache;
+  /**
+   * This maps keys used by the web API to CiviCRM Group *Title* values.
+   */
   public static $mapped_groups = [
     'giga_en_latinamerica' => 'GIGA Focus Latin America - EN',
     'giga_de_latinamerica' => 'GIGA Focus Lateinamerika - DE',
@@ -41,8 +44,25 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
 
     'working_papers_en' => 'GIGA Working Papers - EN',
     'working_papers_de' => 'GIGA Working Papers - DE',
+
+    'events' => 'Public Events',
+
+    'press_global' => 'Press Releases: Global Topics',
+    'press_africa' => 'Press Releases: Africa Related Topics',
+    'press_asia' => 'Press Releases: Asia Related Topics',
+    'press_latin_america' => 'Press Releases: Latin America Related Topics',
+    'press_middle_east' => 'Press Releases: Middle East Related Topics',
+
   ];
 
+  /**
+   * @var int CiviCRM field ID, as used in API calls like custom_NN.
+   */
+  protected $professional_background_field_id;
+  /**
+   * @var int CiviCRM field ID, as used in API calls like custom_NN.
+   */
+  protected $institution_field_id;
   /** @param array of request data.
    */
   public $request_data = [];
@@ -140,14 +160,23 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     $contact_id = $this->findContactByemail(TRUE);
 
     // Look up data.
+    $this->lookupCustomFieldIds();
     $response = civicrm_api3('Contact', 'getsingle', [
       'id' => $contact_id,
-      'return' => ['individual_prefix', 'first_name', 'last_name'],
+      'return' => ['individual_prefix', 'first_name', 'last_name',
+        "custom_$this->institution_field_id",
+        "custom_$this->professional_background_field_id",
+      ],
     ]);
+    // Re-map the custom fields to the keys expected by the API.
+    $response['institution'] = isset($response["custom_$this->institution_field_id"]) ? $response["custom_$this->institution_field_id"] : '';
+    unset($response["custom_$this->institution_field_id"]);
+    $response['professional_background'] = isset($response["custom_$this->professional_background_field_id"]) ? $response["custom_$this->professional_background_field_id"] : '';
+    unset($response["custom_$this->professional_background_field_id"]);
+
     // Ensure we only return the same email.
     $response['email'] = $this->request_query['email'];
-    // @todo Institution/Organisation
-    // @todo Professional background
+
     // Each mapped group.
     foreach (static::$mapped_groups as $api_name => $civicrm_group_title) {
       $group_id = $this->getGroupIdFromTitle($civicrm_group_title);
@@ -180,8 +209,25 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       && $this->request_data[$field] !== $current_data[$field])
       $params[$field] = $this->request_data[$field];
     }
+    // Add custom data.
+
+    $this->lookupCustomFieldIds();
+    if (isset($this->request_data['institution'])) {
+      // API sent Instituion field.
+      if ($this->request_data['institution'] != $current_data['institution']) {
+        $params["custom_$this->institution_field_id"] = $this->request_data['institution'] ? $this->request_data['institution'] : NULL;
+      }
+    }
+    if (isset($this->request_data['professional_background'])) {
+      // API sent Professional Background field.
+      if ($this->request_data['professional_background'] != $current_data['professional_background']) {
+        $params["custom_$this->professional_background_field_id"] = $this->request_data['professional_background'] ? $this->request_data['professional_background'] : NULL;
+      }
+    }
+
     if ($params) {
       $this->validatePrefix();
+      $this->validateProfessionalBackground();
       // Write changes to Contact entity.
       $params += ['id' => $this->contact_id];
       $result = civicrm_api3('Contact', 'create', $params);
@@ -316,6 +362,16 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
     }
     $this->validatePrefix();
 
+    // Add custom data.
+    $this->lookupCustomFieldIds();
+    if (!empty($this->request_data['institution'])) {
+      $params["custom_$this->institution_field_id"] = $this->request_data['institution'];
+    }
+    if (!empty($this->request_data['professional_background'])) {
+      $this->validateProfessionalBackground();
+      $params["custom_$this->professional_background_field_id"] = $this->request_data['professional_background'];
+    }
+
     // OK, all looks fine to proceed. Write changes to Contact entity.
     $params['contact_type'] = 'Individual';
     $result = civicrm_api3('Contact', 'create', $params);
@@ -445,6 +501,27 @@ class CRM_Newsstoregiga_Page_WebAPI extends CRM_Core_Page {
       if (!$result) {
         throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Unknown prefix', 400);
       }
+    }
+  }
+  public function validateProfessionalBackground() {
+    if (!empty($this->request_data['professional_background'])) {
+      $result = civicrm_api3('OptionValue', 'getcount', [
+        'option_group_id' => 'professional_background',
+        'name' => $this->request_data['professional_background'],
+      ]);
+      if (!$result) {
+        throw new CRM_Newsstoregiga_WebAPIException('Bad Request. Unknown professional background value', 400);
+      }
+    }
+  }
+  /**
+   * Look up the custom field ids.
+   */
+  protected function lookupCustomFieldIds() {
+    if (!isset($this->custom_fields)) {
+      require_once 'CRM/Core/BAO/CustomField.php';
+      $this->institution_field_id = CRM_Core_BAO_CustomField::getCustomFieldID('Institution_Organisation', 'Subscriber_Details');
+      $this->professional_background_field_id = CRM_Core_BAO_CustomField::getCustomFieldID('professional_background', 'Subscriber_Details');
     }
   }
 }
