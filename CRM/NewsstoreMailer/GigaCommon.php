@@ -23,12 +23,25 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
   public $giga_type_map;
 
   /**
+   * Body template.
+   */
+  public $body_tpl;
+
+  /**
+   * Item template.
+   */
+  public $item_tpl;
+
+  /**
    * Which config set is chosen.
    */
   protected $giga_config;
 
   /**
    * Configure from input params according to this formatter's requirements.
+   *
+   * Nb. mosaico_tpl_name can either be passed in as a param, or ommitted. If
+   * ommitted we expect to find it in the $giga_config property.
    *
    * @param array $params
    * @return CRM_NewsstoreMailer $this
@@ -38,6 +51,46 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
       throw new \Exception("Missing or invalid giga_type parameter. Should be one of: " . implode(', ', array_keys($this->giga_type_map)));
     }
     $this->giga_config = $this->giga_type_map[$params['giga_type']];
+
+    // Fetch the Mosaico template.
+    if (!empty($params['mosaico_tpl_name'])) {
+      $mosaico_tpl_name = $params['mosaico_tpl_name'];
+    }
+    else {
+      $mosaico_tpl_name = isset($this->giga_config['mosaico_tpl_name']) ? $this->giga_config['mosaico_tpl_name'] : NULL;
+    }
+    if ($mosaico_tpl_name) {
+      // Fetch the template.
+      $mosaico_tpl = civicrm_api3('MosaicoTemplate', 'getvalue', [
+        'return' => "html",
+        'title' => $mosaico_tpl_name,
+      ]);
+    }
+    if (empty($mosaico_tpl)) {
+      throw new \Exception("Missing mosaico_tpl_name, or template is not found.");
+    }
+    $this->parseMosaicoTpl($mosaico_tpl);
+  }
+  /**
+   * Parse the HTML from the mosaico template into a body and a per-item template.
+   *
+   * @param string $mosaico_tpl HTML
+   */
+  public function parseMosaicoTpl($mosaico_tpl) {
+    // The Mosiaco Builder insists on a div where we don't want one. Remove
+    // that now to simplify the next bit.
+    preg_match_all('@<div id="[^"]+">\s*(<!-- __ITEM_(START|END)__ -->)\s*</div>@', $mosaico_tpl, $matches, PREG_OFFSET_CAPTURE);
+    if (empty($matches) || count($matches[0]) != 2) {
+      throw new Exception("Mosaico Template is missing the item start or end marker.");
+    }
+    $start_of_start_marker = $matches[0][0][1];
+    $end_of_start_marker   = $start_of_start_marker + strlen($matches[0][0][0]);
+    $start_of_end_marker = $matches[0][1][1];
+    $end_of_end_marker   = $start_of_end_marker + strlen($matches[0][1][0]);
+    $this->body_tpl = substr($mosaico_tpl, 0, $start_of_start_marker)
+      . '%ITEMS%'
+      . substr($mosaico_tpl, $end_of_end_marker);
+    $this->item_tpl = substr($mosaico_tpl, $end_of_start_marker, $start_of_end_marker - $end_of_start_marker);
   }
 
 
@@ -46,14 +99,10 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
    */
   public function getMailingHtml($items) {
 
-    // Up two levels from this file, and then down into the templates dir.
-    $templates_dir = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR;
-    $item_tpl = file_get_contents($templates_dir . $this->giga_config['item_template']);
-
     $html_items = '';
     foreach ($items as $item) {
       $obj = $item['object'];
-      $html_items .= strtr($item_tpl, [
+      $html_items .= strtr($this->item_tpl, [
         '%ITEM_TITLE%'           => htmlspecialchars($item['title']),
         '%ITEM_DESCRIPTION%'     => strip_tags($obj['item/description'], static::PERMITTED_HTML_TAGS),
         '%ITEM_TEASER%'          => htmlspecialchars($item['teaser']),
@@ -65,8 +114,7 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
       ]);
     }
 
-    $body_tpl = file_get_contents($templates_dir . $this->giga_config['body_template']);
-    $body_html = strtr($body_tpl, [
+    $body_html = strtr($this->body_tpl, [
       '%HEADER_IMG_URL%' => static::GIGA_IMAGES_BASE_URL . $this->giga_config['header'],
       '%ITEMS%' => $html_items,
       '%SUBJECT%' => $this->getMailingSubject($items),
