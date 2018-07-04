@@ -144,6 +144,14 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
     }
     return $subject;
   }
+  /**
+   * Opportunity to edit the parameters of the mailing.
+   *
+   * @param Array $params API params used with Mailing.Create
+   */
+  public function alterCreateMailingParams(&$params) {
+    $params['template_type'] = 'mosaico';
+  }
 }
 
 

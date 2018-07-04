@@ -12,60 +12,52 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer_GigaCommon
    */
   public $giga_type_map = [
     'en-latinamerica' => [
-      'mosaico_tpl_name' => 'tpl-a', // @fixme
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_latinamerica.jpg',
       'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
     'de-latinamerica' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-de.html',
+      'mosaico_tpl_name' => 'focus_template_de',
       'header'        => 'focus_lateinamerika.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
     'en-middleeast' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-en.html',
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_middleeast.jpg',
       'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
     'de-middleeast' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-de.html',
+      'mosaico_tpl_name' => 'focus_template_de',
       'header'        => 'focus_middleeast.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
     'en-asia' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-en.html',
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_asia.jpg',
       'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
     'de-asia' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-de.html',
+      'mosaico_tpl_name' => 'focus_template_de',
       'header'        => 'focus_asien.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
     'en-global' => [
-      'mosaico_tpl_name' => 'tpl-a', // @fixme
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_global.jpg',
       'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
     'de-global' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-en.html',
+      'mosaico_tpl_name' => 'focus_template_de',
       'header'        => 'focus_global.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
     'en-africa' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-en.html',
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_africa.jpg',
       'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
       ],
     'de-afrika' => [
-      'item_template' => 'focus-item.html',
-      'body_template' => 'focus-body-en.html',
+      'mosaico_tpl_name' => 'focus_template',
       'header'        => 'focus_afrika.jpg',
       'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
       ],
