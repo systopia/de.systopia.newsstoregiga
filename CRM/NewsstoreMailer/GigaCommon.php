@@ -18,6 +18,10 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
   const GIGA_IMAGES_BASE_URL = 'https://www.giga-hamburg.de/sites/default/files/newsstore-template-images/';
 
   /**
+   * @var string the key to giga_type_map as passed in by the API's giga_type parameter.
+   */
+  protected $giga_type;
+  /**
    * Map giga_type parameter to template data.
    */
   public $giga_type_map;
@@ -47,9 +51,14 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
    * @return CRM_NewsstoreMailer $this
    */
   public function configure($params=[]) {
+
+    // Select the config from our $giga_type_map using the given giga_type.
+    // Nb. the selected configuration can then be altered by alterConfig() which is
+    // called below.
     if (empty($params['giga_type']) || !isset($this->giga_type_map[$params['giga_type']])) {
       throw new \Exception("Missing or invalid giga_type parameter. Should be one of: " . implode(', ', array_keys($this->giga_type_map)));
     }
+    $this->giga_type   = $params['giga_type'];
     $this->giga_config = $this->giga_type_map[$params['giga_type']];
 
     // Fetch the Mosaico template.
@@ -70,7 +79,16 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
       throw new \Exception("Missing mosaico_tpl_name, or template is not found.");
     }
     $this->parseMosaicoTpl($mosaico_tpl);
+
+    // Allow implementations to tweak the selected configuration, e.g. saves repetition in config.
+    $this->alterConfig();
   }
+  /**
+   * Gives classes chance to alter the configured content.
+   *
+   * Some things are easier to configure this way.
+   */
+  public function alterConfig() { }
   /**
    * Parse the HTML from the mosaico template into a body and a per-item template.
    *

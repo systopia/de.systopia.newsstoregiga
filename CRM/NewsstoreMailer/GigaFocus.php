@@ -11,56 +11,51 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer_GigaCommon
    * Map giga_type parameter to template data.
    */
   public $giga_type_map = [
-    'en-latinamerica' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'latinamerica-en' => [
       'header'        => 'focus_latinamerica.jpg',
-      'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
-    'de-latinamerica' => [
-      'mosaico_tpl_name' => 'focus_template_de',
+    'latinamerica-de' => [
       'header'        => 'focus_lateinamerika.jpg',
-      'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
-    'en-middleeast' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'middleeast-en' => [
       'header'        => 'focus_middleeast.jpg',
-      'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
-    'de-middleeast' => [
-      'mosaico_tpl_name' => 'focus_template_de',
+    'middleeast-de' => [
       'header'        => 'focus_middleeast.jpg',
-      'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
-    'en-asia' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'asia-en' => [
       'header'        => 'focus_asia.jpg',
-      'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
-    'de-asia' => [
-      'mosaico_tpl_name' => 'focus_template_de',
+    'asia-de' => [
       'header'        => 'focus_asien.jpg',
-      'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
-    'en-global' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'global-en' => [
       'header'        => 'focus_global.jpg',
-      'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
     ],
-    'de-global' => [
-      'mosaico_tpl_name' => 'focus_template_de',
+    'global-de' => [
       'header'        => 'focus_global.jpg',
-      'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
     ],
-    'en-africa' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'africa-en' => [
       'header'        => 'focus_africa.jpg',
-      'subject'       => 'New GIGA Focus | %ITEM_TITLE%'
       ],
-    'de-afrika' => [
-      'mosaico_tpl_name' => 'focus_template',
+    'afrika-de' => [
       'header'        => 'focus_afrika.jpg',
-      'subject'       => 'Neuer GIGA Focus | %ITEM_TITLE%'
       ],
   ];
 
+  /**
+   * Set mosaico_tpl_name.
+   */
+  public function alterConfig() {
+    // There are only two mosaico templates, a DE and an EN one.
+    $is_english = (substr($this->giga_type, -3) === '-en');
+    $defaults = [
+      'mosaico_tpl_name' => $is_english ? 'focus_template_en' : 'focus_template_de',
+      'subject'          => $is_english ?  'New GIGA Focus | %ITEM_TITLE%' : 'Neuer GIGA Focus | %ITEM_TITLE%',
+    ];
+
+    foreach ($this->giga_config as &$_) {
+      $_ += $defaults;
+    }
+  }
 }

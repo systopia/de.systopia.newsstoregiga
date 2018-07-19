@@ -12,63 +12,53 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
    */
   public $giga_type_map = [
     'africa-spectrum-de' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-de.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Africa Spectrum',
       'family'        => 'AFRICA SPECTRUM',
     ],
     'africa-spectrum-en' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Africa Spectrum',
-      'family'        => 'AFRICA SPECTRUM', 
+      'family'        => 'AFRICA SPECTRUM',
     ],
     'chinese-affairs-de' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-de.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Current Chinese Affairs',
       'family'        => 'JOURNAL OF CURRENT CHINESE AFFAIRS',
     ],
     'chinese-affairs-en' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Current Chinese Affairs',
       'family'        => 'JOURNAL OF CURRENT CHINESE AFFAIRS',
     ],
     'latin-america-de' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Politics in Latin America',
-      'family'        => 'JOURNAL OF POLITICS IN LATIN AMERICA', 
+      'family'        => 'JOURNAL OF POLITICS IN LATIN AMERICA',
     ],
     'latin-america-en' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Politics in Latin America',
       'family'        => 'JOURNAL OF POLITICS IN LATIN AMERICA',
     ],
     'se-asia-de' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'Neue Ausgabe | Journal of Current Southeast Asian Affairs',
       'family'        => 'JOURNAL OF CURRENT SOUTHEAST ASIAN AFFAIRS',
     ],
     'se-asia-en' => [
-      'item_template' => 'journal-family-item.html',
-      'body_template' => 'journal-family-body-en.html',
-      'header'        => 'journalfamily.jpg',
       'subject'       => 'New Issue | Journal of Current Southeast Asian Affairs',
       'family'        => 'JOURNAL OF CURRENT SOUTHEAST ASIAN AFFAIRS',
     ],
   ];
 
+  /**
+   * Add in common header image and set mosaico_tpl_name.
+   */
+  public function alterConfig() {
+    // There are only two mosaico templates, a DE and an EN one.
+    $tpl = (substr($this->giga_type, -3) === '-en')
+      ? 'journal_template_en'
+      : 'journal_template_de';
+
+    foreach ($this->giga_config as &$_) {
+      $_['header'] = 'journalfamily.jpg';
+      $_['mosaico_tpl_name'] = $tpl;
+    }
+  }
   /**
    * Template the email.
    */
