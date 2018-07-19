@@ -54,10 +54,10 @@ class CRM_NewsstoreMailer_GigaJournalFamily extends CRM_NewsstoreMailer_GigaComm
       ? 'journal_template_en'
       : 'journal_template_de';
 
-    foreach ($this->giga_config as &$_) {
-      $_['header'] = 'journalfamily.jpg';
-      $_['mosaico_tpl_name'] = $tpl;
-    }
+    $this->giga_config += [
+      'header'           => 'journalfamily.jpg',
+      'mosaico_tpl_name' => $tpl,
+    ];
   }
   /**
    * Template the email.

@@ -60,8 +60,11 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
     }
     $this->giga_type   = $params['giga_type'];
     $this->giga_config = $this->giga_type_map[$params['giga_type']];
+    // Allow implementations to tweak the selected configuration, e.g. saves repetition in config.
+    $this->alterConfig();
 
     // Fetch the Mosaico template.
+    // This can be provided as an API parameter, or in the coded config.
     if (!empty($params['mosaico_tpl_name'])) {
       $mosaico_tpl_name = $params['mosaico_tpl_name'];
     }
@@ -76,12 +79,9 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
       ]);
     }
     if (empty($mosaico_tpl)) {
-      throw new \Exception("Missing mosaico_tpl_name, or template is not found.");
+      throw new \Exception("Missing mosaico_tpl_name, or $mosaico_tpl_name template is not found.");
     }
     $this->parseMosaicoTpl($mosaico_tpl);
-
-    // Allow implementations to tweak the selected configuration, e.g. saves repetition in config.
-    $this->alterConfig();
   }
   /**
    * Gives classes chance to alter the configured content.

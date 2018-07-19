@@ -49,13 +49,17 @@ class CRM_NewsstoreMailer_GigaFocus extends CRM_NewsstoreMailer_GigaCommon
   public function alterConfig() {
     // There are only two mosaico templates, a DE and an EN one.
     $is_english = (substr($this->giga_type, -3) === '-en');
-    $defaults = [
-      'mosaico_tpl_name' => $is_english ? 'focus_template_en' : 'focus_template_de',
-      'subject'          => $is_english ?  'New GIGA Focus | %ITEM_TITLE%' : 'Neuer GIGA Focus | %ITEM_TITLE%',
-    ];
-
-    foreach ($this->giga_config as &$_) {
-      $_ += $defaults;
+    if ($is_english) {
+      $this->giga_config += [
+        'mosaico_tpl_name' => 'focus_template_en',
+        'subject'          => 'New GIGA Focus | %ITEM_TITLE%',
+      ];
+    }
+    else {
+      $this->giga_config += [
+        'mosaico_tpl_name' => 'focus_template_de',
+        'subject'          => 'Neuer GIGA Focus | %ITEM_TITLE%',
+      ];
     }
   }
 }
