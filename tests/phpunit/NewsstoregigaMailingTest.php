@@ -43,6 +43,9 @@ class NewsstoregigaMailingTest extends \PHPUnit_Framework_TestCase implements He
     parent::tearDown();
   }
 
+  /**
+   * Test the parsing logic.
+   */
   public function testParser() {
     // Fake a mosaico template.
     $mosaico_tpl = civicrm_api3('MosaicoTemplate', 'create', [
@@ -65,7 +68,7 @@ here.
 
     $formatter = new CRM_NewsstoreMailer_GigaFocus([
       'formatter' => 'CRM_NewsstoreMailer_GigaFocus',
-      'giga_type' => 'en-global',
+      'giga_type' => 'global-en',
       'mosaico_tpl_name' => 'test-tpl-a',// forces override.
       'mailing_group_id' => $group['id'],
       'news_store_source' => 1, // Does not exist, but that's fine for now.
@@ -103,7 +106,7 @@ zzz',
 
     $formatter = new CRM_NewsstoreMailer_GigaFocus([
       'formatter' => 'CRM_NewsstoreMailer_GigaFocus',
-      'giga_type' => 'en-global',
+      'giga_type' => 'global-en',
       'mosaico_tpl_name' => 'test-tpl-a',// forces override.
       'mailing_group_id' => $group['id'],
       'news_store_source' => 1, // Does not exist, but that's fine for now.

@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<menu>
-  <item>
-    <path>civicrm/giga-subscriptions-api</path>
-    <page_callback>CRM_Newsstoregiga_Page_WebAPI</page_callback>
-    <title>WebAPI</title>
-    <access_arguments>access GIGA subscriptions API</access_arguments>
-  </item>
-</menu>

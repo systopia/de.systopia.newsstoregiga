@@ -1,4 +1,12 @@
-# Custom functionality using NewsStore extension.
+# Custom functionality for GIGA
+
+Note: this extension has two purposes
+
+1. Provide formatters to create GIGA RSS mailings using NewsStore and
+   NewsStoreMailer. The documentation below realtes to this.
+
+2. Several custom fields are configured - see `xml/auto_install.xml`  
+   There is currently no doucumentation for this. Is it still needed?
 
 ## API method: NewsStoreSource.newsstoremailer
 
