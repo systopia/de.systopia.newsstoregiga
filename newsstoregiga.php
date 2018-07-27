@@ -199,3 +199,14 @@ function newsstoregiga_civicrm_navigationMenu(&$menu) {
   ));
   _newsstoregiga_civix_navigationMenu($menu);
 } // */
+
+/**
+ * Implements hook_newsstoremailer_formatters
+ */
+function newsstoregiga_newsstoremailer_formatters(&$formatters) {
+  $formatters += [
+    'CRM_NewsstoreMailer_GigaFocus' => 'GIGA Focus',
+    'CRM_NewsstoreMailer_GigaJournalFamily' => 'GIGA Journal Family',
+    'CRM_NewsstoreMailer_GigaWorkingPapers' => 'GIGA Working Papers',
+  ];
+}

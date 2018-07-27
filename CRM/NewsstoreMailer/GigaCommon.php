@@ -132,6 +132,7 @@ class CRM_NewsstoreMailer_GigaCommon extends CRM_NewsstoreMailer
         '%ITEM_SOURCE%'          => $obj['item/source'],
         '%ITEM_DC:CREATOR%'      => $obj['item/dc:creator'],
         '%ITEM_CONTENT_ENCODED%' => strip_tags($obj['item/content:encoded'], static::PERMITTED_HTML_TAGS),
+        '%SUBJECT%'              => $this->getMailingSubject($items),
       ]);
     }
 
